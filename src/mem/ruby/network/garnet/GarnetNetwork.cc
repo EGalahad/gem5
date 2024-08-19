@@ -381,7 +381,7 @@ GarnetNetwork::get_router_id(int global_ni, int vnet)
     return m_nis[local_ni]->get_router_id(vnet);
 }
 
-void
+void 
 GarnetNetwork::regStats()
 {
     Network::regStats();
@@ -391,27 +391,31 @@ GarnetNetwork::regStats()
         .init(m_virtual_networks)
         .name(name() + ".packets_received")
         .flags(statistics::pdf | statistics::total | statistics::nozero |
-            statistics::oneline)
-        ;
+               statistics::oneline)
+        .unit(statistics::units::Count::get())
+        .desc("Sum of number of packets received per vnet through all network interfaces.");
 
     m_packets_injected
         .init(m_virtual_networks)
         .name(name() + ".packets_injected")
         .flags(statistics::pdf | statistics::total | statistics::nozero |
-            statistics::oneline)
-        ;
+               statistics::oneline)
+        .unit(statistics::units::Count::get())
+        .desc("Sum of number of packets injected per vnet (flitized) through all network interfaces. (Counted multiple times for packets with multicast)");
 
     m_packet_network_latency
         .init(m_virtual_networks)
         .name(name() + ".packet_network_latency")
         .flags(statistics::oneline)
-        ;
+        .unit(statistics::units::Tick::get())
+        .desc("Sum of network latency per vnet (time travelling in the network).");
 
     m_packet_queueing_latency
         .init(m_virtual_networks)
         .name(name() + ".packet_queueing_latency")
         .flags(statistics::oneline)
-        ;
+        .unit(statistics::units::Tick::get())
+        .desc("Sum of queueing latency per vnet (time waiting at the network interface buffers).");
 
     for (int i = 0; i < m_virtual_networks; i++) {
         m_packets_received.subname(i, csprintf("vnet-%i", i));
@@ -421,31 +425,39 @@ GarnetNetwork::regStats()
     }
 
     m_avg_packet_vnet_latency
-        .name(name() + ".average_packet_vnet_latency")
-        .flags(statistics::oneline);
-    m_avg_packet_vnet_latency =
-        m_packet_network_latency / m_packets_received;
+    .name(name() + ".average_packet_vnet_latency")
+        .flags(statistics::oneline)
+        .unit(statistics::units::Tick::get())
+        .desc("Average network latency per vnet (time travelling in the network).");
+    m_avg_packet_vnet_latency = m_packet_network_latency / m_packets_received;
 
     m_avg_packet_vqueue_latency
         .name(name() + ".average_packet_vqueue_latency")
-        .flags(statistics::oneline);
+        .flags(statistics::oneline)
+        .unit(statistics::units::Tick::get())
+        .desc("Average queueing latency per vnet (time waiting at the network interface buffers).");
     m_avg_packet_vqueue_latency =
         m_packet_queueing_latency / m_packets_received;
 
-    m_avg_packet_network_latency
-        .name(name() + ".average_packet_network_latency");
+    m_avg_packet_network_latency.name(name() +
+                                      ".average_packet_network_latency")
+                                      .unit(statistics::units::Tick::get())
+                                        .desc("Average network latency (time travelling in the network).");
     m_avg_packet_network_latency =
         sum(m_packet_network_latency) / sum(m_packets_received);
 
-    m_avg_packet_queueing_latency
-        .name(name() + ".average_packet_queueing_latency");
-    m_avg_packet_queueing_latency
-        = sum(m_packet_queueing_latency) / sum(m_packets_received);
+    m_avg_packet_queueing_latency.name(name() +
+                                       ".average_packet_queueing_latency")
+                                        .unit(statistics::units::Tick::get())
+                                         .desc("Average queueing latency (time waiting at the network interface buffers).");
+    m_avg_packet_queueing_latency =
+        sum(m_packet_queueing_latency) / sum(m_packets_received);
 
-    m_avg_packet_latency
-        .name(name() + ".average_packet_latency");
-    m_avg_packet_latency
-        = m_avg_packet_network_latency + m_avg_packet_queueing_latency;
+    m_avg_packet_latency.name(name() + ".average_packet_latency")
+        .unit(statistics::units::Tick::get())
+        .desc("Average packet latency (network + queueing).");
+    m_avg_packet_latency =
+        m_avg_packet_network_latency + m_avg_packet_queueing_latency;
 
     // Flits
     m_flits_received
@@ -507,9 +519,10 @@ GarnetNetwork::regStats()
     m_avg_flit_latency =
         m_avg_flit_network_latency + m_avg_flit_queueing_latency;
 
-
     // Hops
-    m_avg_hops.name(name() + ".average_hops");
+    m_avg_hops.name(name() + ".average_hops")
+        .unit(statistics::units::Count::get())
+        .desc("Average number of hops per flit");
     m_avg_hops = m_total_hops / sum(m_flits_received);
 
     // Links
