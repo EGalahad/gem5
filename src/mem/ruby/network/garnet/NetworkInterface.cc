@@ -95,6 +95,7 @@ NetworkInterface::addOutPort(NetworkLink *out_link,
     // the logic within outport and inport.
     if (niOutVcs.size() == 0) {
         m_vc_per_vnet = consumerVcs;
+        fatal_if(m_vc_per_vnet % 2 != 0, "m_vc_per_vnet must be even\n");
         int m_num_vcs = consumerVcs * m_virtual_networks;
         niOutVcs.resize(m_num_vcs);
         outVcState.reserve(m_num_vcs);
@@ -459,10 +460,10 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
 int
 NetworkInterface::calculateVC(int vnet)
 {
-    for (int i = 0; i < m_vc_per_vnet; i++) {
+    for (int i = 0; i < m_vc_per_vnet / 2; i++) {
         int delta = m_vc_allocator[vnet];
         m_vc_allocator[vnet]++;
-        if (m_vc_allocator[vnet] == m_vc_per_vnet)
+        if (m_vc_allocator[vnet] == m_vc_per_vnet / 2)
             m_vc_allocator[vnet] = 0;
 
         if (outVcState[(vnet*m_vc_per_vnet) + delta].isInState(

@@ -65,6 +65,7 @@ class SwitchAllocator : public Consumer
     void arbitrate_outports();
     bool send_allowed(int inport, int invc, int outport, int outvc);
     int vc_allocate(int outport, int inport, int invc);
+    std::pair<int, int> compute_outvc_range(int invc);
 
     inline double
     get_input_arbiter_activity()

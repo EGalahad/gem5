@@ -183,6 +183,15 @@ SwitchAllocator::arbitrate_outports()
                 if (outvc == -1) {
                     // VC Allocation - select any free VC from outport
                     outvc = vc_allocate(outport, inport, invc);
+                    // flit* t_flit = input_unit->peekTopFlit(invc);
+                    // std::cout << "packet#" << t_flit->getPacketID()
+                    //           << " [" << t_flit->get_route().src_router
+                    //           << "->" << t_flit->get_route().dest_router
+                    //           << "] at router" << m_router->get_id()
+                    //           << ", inport: " << input_unit->get_direction()
+                    //           << ", output: " << output_unit->get_direction()
+                    //           << ", invc: " << invc
+                    //           << ", outvc: " << outvc << std::endl;
                 }
 
                 // remove flit from Input VC
@@ -297,7 +306,8 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
         // needs outvc
         // this is only true for HEAD and HEAD_TAIL flits.
 
-        if (output_unit->has_free_vc(vnet)) {
+        auto outvc_range = compute_outvc_range(invc);
+        if (output_unit->has_free_vc(outvc_range.first, outvc_range.second)) {
 
             has_outvc = true;
 
@@ -342,13 +352,38 @@ int
 SwitchAllocator::vc_allocate(int outport, int inport, int invc)
 {
     // Select a free VC from the output port
+    auto outvc_range = compute_outvc_range(invc);
     int outvc =
-        m_router->getOutputUnit(outport)->select_free_vc(get_vnet(invc));
+        m_router->getOutputUnit(outport)->select_free_vc(outvc_range.first,
+                                                         outvc_range.second);
 
     // has to get a valid VC since it checked before performing SA
     assert(outvc != -1);
     m_router->getInputUnit(inport)->grant_outvc(invc, outvc);
     return outvc;
+}
+
+std::pair<int, int>
+SwitchAllocator::compute_outvc_range(int invc)
+{   
+    // if input unit from the first half of vc, then can only go to free vc of the first half
+    // except if the router_id is the last one, then it can only go to the second half of the vc
+    // if input unit from the second half of vc, then can only go to free vc of the second half
+    int router_id = m_router->get_id();
+    int vc_base = get_vnet(invc) * m_vc_per_vnet;
+    int vc_start = vc_base;
+    int vc_end = vc_base + m_vc_per_vnet;
+    if (router_id != m_router->get_net_ptr()->getNumRouters() - 1) {
+        if (vc_base <= invc && invc < vc_base + m_vc_per_vnet / 2) {
+            vc_end = vc_base + m_vc_per_vnet / 2;
+        } else if (vc_base + m_vc_per_vnet / 2 <= invc && invc < vc_base + m_vc_per_vnet) {
+            vc_start = vc_base + m_vc_per_vnet / 2;
+        }
+    } else {
+        // assert(vc_base <= invc && invc < vc_base + m_vc_per_vnet / 2  or outport is ext link);
+        vc_start = vc_base + m_vc_per_vnet / 2;
+    }
+    return std::make_pair(vc_start, vc_end);
 }
 
 // Wakeup the router next cycle to perform SA again

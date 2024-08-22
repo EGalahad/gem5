@@ -68,8 +68,8 @@ class Ring(SimpleTopology):
                     link_id=link_count,
                     src_node=routers[i],
                     dst_node=routers[(i + 1) % num_routers],
-                    src_outport="CW",
-                    dst_inport="CCW",
+                    src_outport="CCW",
+                    dst_inport="CW",
                     latency=link_latency,
                     weight=1,
                 )
@@ -82,8 +82,8 @@ class Ring(SimpleTopology):
                     link_id=link_count,
                     src_node=routers[i],
                     dst_node=routers[(i - 1) % num_routers],
-                    src_outport="CCW",
-                    dst_inport="CW",
+                    src_outport="CW",
+                    dst_inport="CCW",
                     latency=link_latency,
                     weight=1,
                 )

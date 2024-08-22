@@ -282,7 +282,7 @@ RoutingUnit::outportComputeRingShortest(RouteInfo route,
     assert(x_hops > 0);
 
     // if x_hops > num_routers/2, go the other way
-    outport_dirn = (x_hops > num_routers / 2) ? "CCW" : "CW";
+    outport_dirn = (x_hops > num_routers / 2) ? "CW" : "CCW";
 
     return m_outports_dirn2idx[outport_dirn];
 }
