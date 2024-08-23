@@ -65,6 +65,8 @@ GarnetNetwork::GarnetNetwork(const Params &p)
     : Network(p)
 {
     m_num_rows = p.num_rows;
+    m_kary = p.kary;
+    m_ndim = p.ndim;
     m_ni_flit_size = p.ni_flit_size;
     m_max_vcs_per_vnet = 0;
     m_buffers_per_data_vc = p.buffers_per_data_vc;
@@ -132,6 +134,14 @@ GarnetNetwork::init()
     } else {
         m_num_rows = -1;
         m_num_cols = -1;
+    }
+
+    if (getKary() > 0) {
+        // Only for Torus topology
+        assert(m_routers.size() == pow(getKary(), getNdim()));
+    } else {
+        m_kary = -1;
+        m_ndim = -1;
     }
 
     // FaultModel: declare each router to the fault model

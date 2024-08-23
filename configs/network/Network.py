@@ -48,6 +48,18 @@ def define_options(parser):
         help="the number of rows in the mesh topology",
     )
     parser.add_argument(
+        "--kary",
+        type=int,
+        default=0,
+        help="the value of k in the k-ary n-cube topology",
+    )
+    parser.add_argument(
+        "--ndim",
+        type=int,
+        default=0,
+        help="the value of n in the k-ary n-cube topology",
+    )
+    parser.add_argument(
         "--network",
         default="simple",
         choices=["simple", "garnet"],
@@ -165,6 +177,8 @@ def init_network(options, network, InterfaceClass):
 
     if options.network == "garnet":
         network.num_rows = options.mesh_rows
+        network.kary = options.kary
+        network.ndim = options.ndim
         network.vcs_per_vnet = options.vcs_per_vnet
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm
