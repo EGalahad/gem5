@@ -34,6 +34,7 @@
 #include "base/compiler.hh"
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/garnet/InputUnit.hh"
+#include "mem/ruby/network/garnet/OutputUnit.hh"
 #include "mem/ruby/network/garnet/Router.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 
@@ -267,7 +268,27 @@ RoutingUnit::outportComputeGoal(RouteInfo route,
                                 int inport,
                                 PortDirection inport_dirn)
 {
-    panic("%s placeholder executed", __FUNCTION__);
+    int min_queue_length = INFINITE_;
+    int min_queue_port = -1;
+    // std::cout << "router id: " << m_router->get_id() << std::endl;
+    for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
+        int dir = route.quadrant[i];
+        if (dir == 0) {
+            continue;
+        }
+        PortDirection outport_dirn = (dir == -1) ? "L" : "R";
+        outport_dirn += std::to_string(i);
+        int outport = m_outports_dirn2idx[outport_dirn];
+        flitBuffer* output_queue = m_router->getOutputUnit(outport)->getOutQueue();
+        // std::cout << "\tport direction: " << outport_dirn
+        //           << " queue size: " << output_queue->getSize() << std::endl;
+        if (output_queue->getSize() < min_queue_length) {
+            min_queue_length = output_queue->getSize();
+            min_queue_port = outport;
+        }
+    }
+    assert(min_queue_port != -1);
+    return min_queue_port;
 }
 
 // Template for implementing custom routing algorithm
