@@ -191,6 +191,8 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
         case XY_:     outport =
             outportComputeXY(route, inport, inport_dirn); break;
         // any custom algorithm
+        case GOAL_: outport =
+            outportComputeGoal(route, inport, inport_dirn); break;
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
         default: outport =
@@ -258,6 +260,14 @@ RoutingUnit::outportComputeXY(RouteInfo route,
     }
 
     return m_outports_dirn2idx[outport_dirn];
+}
+
+int
+RoutingUnit::outportComputeGoal(RouteInfo route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    panic("%s placeholder executed", __FUNCTION__);
 }
 
 // Template for implementing custom routing algorithm

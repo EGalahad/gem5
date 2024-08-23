@@ -36,6 +36,7 @@
 #include <cmath>
 
 #include "base/cast.hh"
+#include "base/random.hh"
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet/Credit.hh"
@@ -364,6 +365,19 @@ NetworkInterface::checkStallQueue()
     }
 }
 
+std::vector<int>
+get_router_coordinates(int router_id, int ndim, int kary)
+{
+    std::vector<int> router_coords;
+    int divisor = 1;
+    for (int i = 0; i < ndim; i++) {
+        int coord = (router_id / divisor) % kary;
+        router_coords.push_back(coord);
+        divisor *= kary;
+    }
+    return router_coords;
+}
+
 // Embed the protocol message into flits
 bool
 NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
@@ -429,6 +443,49 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         route.src_router = oPort->routerID();
         route.dest_ni = destID;
         route.dest_router = m_net_ptr->get_router_id(destID, vnet);
+
+        int ndim = m_net_ptr->getNdim();
+        int kary = m_net_ptr->getKary();
+        auto src_coords = get_router_coordinates(route.src_router, ndim, kary);
+        auto dest_coords = get_router_coordinates(route.dest_router, ndim, kary);
+
+        std::vector<int> positive_distance(ndim, 0); // the distance in each dimension if travel in positive direction
+        for (int i = 0; i < ndim; i++) {
+            positive_distance[i] = (dest_coords[i] - src_coords[i] + kary) % kary;
+        }
+
+        route.quadrant.resize(ndim);
+        for (int i = 0; i < ndim; i++) {
+            if (positive_distance[i] == 0) {
+                route.quadrant[i] = 0;
+            } else {
+                route.quadrant[i] = (random_mt.random(0, kary - 1) < positive_distance[i]) ? -1 : 1;
+            }
+        }
+
+        // // print out the dest/src coords and positive distance
+        // std::cout << "src_coords: ";
+        // for (int i = 0; i < ndim; i++) {
+        //     std::cout << src_coords[i] << " ";
+        // }
+        // std::cout << std::endl;
+        // std::cout << "dest_coords: ";
+        // for (int i = 0; i < ndim; i++) {
+        //     std::cout << dest_coords[i] << " ";
+        // }
+        // std::cout << std::endl;
+        // std::cout << "positive_distance: ";
+        // for (int i = 0; i < ndim; i++) {
+        //     std::cout << positive_distance[i] << " ";
+        // }
+        // std::cout << std::endl;
+
+        // // print out the quadrant
+        // std::cout << "quadrant: ";
+        // for (int i = 0; i < ndim; i++) {
+        //     std::cout << route.quadrant[i] << " ";
+        // }
+        // std::cout << std::endl;
 
         // initialize hops_traversed to -1
         // so that the first router increments it to 0
