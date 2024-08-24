@@ -161,6 +161,8 @@ class GarnetNetwork : public Network
     void update_traffic_distribution(RouteInfo route);
     int getNextPacketID() { return m_next_packet_id++; }
 
+    int getFlowControl() { return m_flow_control; }
+
   protected:
     // Configuration
     int m_num_rows;
@@ -173,6 +175,7 @@ class GarnetNetwork : public Network
     uint32_t m_buffers_per_data_vc;
     int m_routing_algorithm;
     bool m_enable_fault_model;
+    int m_flow_control;
 
     // Statistical variables
     statistics::Vector m_packets_received;

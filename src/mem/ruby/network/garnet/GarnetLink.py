@@ -113,6 +113,8 @@ class GarnetIntLink(BasicIntLink):
         Parent.ni_flit_size, "bit width supported by the router"
     )
 
+    is_wrap = Param.Bool(False, "wrap around link")
+
 
 # Exterior fixed pipeline links between a router and a controller
 class GarnetExtLink(BasicExtLink):
@@ -174,3 +176,5 @@ class GarnetExtLink(BasicExtLink):
     width = Param.UInt32(
         Parent.ni_flit_size, "bit width supported by the router"
     )
+
+    

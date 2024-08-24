@@ -45,6 +45,7 @@ class BasicLink(SimObject):
     bandwidth_factor = Param.Int("generic bandwidth factor, usually in bytes")
     weight = Param.Int(1, "used to restrict routing in shortest path analysis")
     supported_vnets = VectorParam.Int([], "Vnets supported Default:All([])")
+    
 
 
 class BasicExtLink(BasicLink):

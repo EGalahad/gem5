@@ -86,6 +86,7 @@ class Torus(SimpleTopology):
                         dst_inport="L%d" % j,
                         latency=link_latency,
                         weight=1,
+                        is_wrap=(coord[j] == k-1),
                     )
                 )
                 link_count += 1
@@ -100,6 +101,7 @@ class Torus(SimpleTopology):
                         dst_inport="R%d" % j,
                         latency=link_latency,
                         weight=1,
+                        is_wrap=(coord[j] == 0),
                     )
                 )
                 link_count += 1

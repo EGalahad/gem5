@@ -157,6 +157,8 @@ class InputUnit : public Consumer
 
     void resetStats();
 
+    bool canUseThisVC(int flow_control, int invc, int outvc_offset);
+
   private:
     Router *m_router;
     int m_id;

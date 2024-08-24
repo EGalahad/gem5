@@ -130,7 +130,14 @@ def define_options(parser):
         help="""SimpleNetwork links uses a separate physical
             channel for each virtual network""",
     )
-
+    parser.add_argument(
+        "--flow-control",
+        action="store",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="""Flow control scheme for garnet network, 0: default, 1: star""",
+    )
 
 def create_network(options, ruby):
 
@@ -183,6 +190,7 @@ def init_network(options, network, InterfaceClass):
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
+        network.flow_control = options.flow_control
 
         # Create Bridges and connect them to the corresponding links
         for intLink in network.int_links:

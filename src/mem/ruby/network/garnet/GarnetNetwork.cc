@@ -73,6 +73,7 @@ GarnetNetwork::GarnetNetwork(const Params &p)
     m_buffers_per_ctrl_vc = p.buffers_per_ctrl_vc;
     m_routing_algorithm = p.routing_algorithm;
     m_next_packet_id = 0;
+    m_flow_control = p.flow_control;
 
     m_enable_fault_model = p.enable_fault_model;
     if (m_enable_fault_model)
@@ -103,6 +104,12 @@ GarnetNetwork::GarnetNetwork(const Params &p)
         NetworkInterface *ni = safe_cast<NetworkInterface *>(*i);
         m_nis.push_back(ni);
         ni->init_net_ptr(this);
+    }
+
+    // check the flow control requirement
+    if (m_flow_control == 1) {
+        // for star flow control, we need 2 *-channel and at least 1 non-*-channel, here we keep the the redundant channel to be the non-* ones
+        assert(p.vcs_per_vnet >= 3);
     }
 
     // Print Garnet version
@@ -332,6 +339,8 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
     m_max_vcs_per_vnet = std::max(m_max_vcs_per_vnet,
                              std::max(m_routers[dest]->get_vc_per_vnet(),
                              m_routers[src]->get_vc_per_vnet()));
+
+    garnet_link->m_network_link->setWrap(garnet_link->isWrap());
 
     /*
      * We check if a bridge was enabled at any end of the link.

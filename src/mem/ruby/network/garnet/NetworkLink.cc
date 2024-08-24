@@ -49,6 +49,7 @@ NetworkLink::NetworkLink(const Params &p)
     : ClockedObject(p), Consumer(this), m_id(p.link_id),
       m_type(NUM_LINK_TYPES_),
       m_latency(p.link_latency), m_link_utilized(0),
+      m_is_wrap(false),
       m_virt_nets(p.virt_nets), linkBuffer(),
       link_consumer(nullptr), link_srcQueue(nullptr)
 {
