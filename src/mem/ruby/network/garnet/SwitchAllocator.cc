@@ -158,18 +158,6 @@ SwitchAllocator::arbitrate_inports()
  * to the upstream router. For HEAD_TAIL/TAIL flits, is_free_signal in the
  * credit is set to true.
  */
-std::vector<int>
-get_router_coordinates_SW(int router_id, int ndim, int kary)
-{
-    std::vector<int> router_coords;
-    int divisor = 1;
-    for (int i = 0; i < ndim; i++) {
-        int coord = (router_id / divisor) % kary;
-        router_coords.push_back(coord);
-        divisor *= kary;
-    }
-    return router_coords;
-}
 void
 SwitchAllocator::arbitrate_outports()
 {
