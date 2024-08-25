@@ -494,6 +494,7 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         m_net_ptr->increment_injected_packets(vnet);
         m_net_ptr->update_traffic_distribution(route);
         int packet_id = m_net_ptr->getNextPacketID();
+        route.packet_id = packet_id;
         for (int i = 0; i < num_flits; i++) {
             m_net_ptr->increment_injected_flits(vnet);
             flit *fl = new flit(packet_id,

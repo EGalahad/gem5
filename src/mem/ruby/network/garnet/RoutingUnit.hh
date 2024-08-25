@@ -53,7 +53,7 @@ class RoutingUnit
 {
   public:
     RoutingUnit(Router *router);
-    int outportCompute(RouteInfo route,
+    int outportCompute(RouteInfo& route,
                       int inport,
                       PortDirection inport_dirn);
 
@@ -74,7 +74,7 @@ class RoutingUnit
                          PortDirection inport_dirn);
 
     // Routing for Torus with GOAL algorithm
-    int outportComputeGoal(RouteInfo route,
+    int outportComputeGoal(RouteInfo& route,
                            int inport,
                            PortDirection inport_dirn);
 

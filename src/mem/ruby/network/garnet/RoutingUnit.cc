@@ -167,7 +167,7 @@ RoutingUnit::addOutDirection(PortDirection outport_dirn, int outport_idx)
 // table is provided here.
 
 int
-RoutingUnit::outportCompute(RouteInfo route, int inport,
+RoutingUnit::outportCompute(RouteInfo& route, int inport,
                             PortDirection inport_dirn)
 {
     int outport = -1;
@@ -263,13 +263,27 @@ RoutingUnit::outportComputeXY(RouteInfo route,
     return m_outports_dirn2idx[outport_dirn];
 }
 
+std::vector<int>
+get_router_coordinates_2(int router_id, int ndim, int kary)
+{
+    std::vector<int> router_coords;
+    int divisor = 1;
+    for (int i = 0; i < ndim; i++) {
+        int coord = (router_id / divisor) % kary;
+        router_coords.push_back(coord);
+        divisor *= kary;
+    }
+    return router_coords;
+}
+
 int
-RoutingUnit::outportComputeGoal(RouteInfo route,
+RoutingUnit::outportComputeGoal(RouteInfo& route,
                                 int inport,
                                 PortDirection inport_dirn)
 {
     int min_queue_length = INFINITE_;
     int min_queue_port = -1;
+    int min_queue_dim = -1;
     // std::cout << "router id: " << m_router->get_id() << std::endl;
     for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
         int dir = route.quadrant[i];
@@ -285,9 +299,60 @@ RoutingUnit::outportComputeGoal(RouteInfo route,
         if (output_queue->getSize() < min_queue_length) {
             min_queue_length = output_queue->getSize();
             min_queue_port = outport;
+            min_queue_dim = i;
         }
     }
     assert(min_queue_port != -1);
+    // if have reached the goal on this dimension, then update the route.quadrant
+    std::vector<int> src_coords = get_router_coordinates_2(route.src_router,
+                                                          m_router->get_net_ptr()->getNdim(),
+                                                          m_router->get_net_ptr()->getKary());
+    std::vector<int> goal_coords = get_router_coordinates_2(route.dest_router,
+                                                          m_router->get_net_ptr()->getNdim(),
+                                                          m_router->get_net_ptr()->getKary());
+    std::vector<int> my_coords = get_router_coordinates_2(m_router->get_id(),
+                                                        m_router->get_net_ptr()->getNdim(),
+                                                        m_router->get_net_ptr()->getKary());
+    std::cout << "packet id: " << route.packet_id << std::endl;
+    std::cout << "route quadrant: [";
+    for (int i = 0; i < route.quadrant.size(); i++) {
+        std::cout << route.quadrant[i] << ", ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "source coords: [";
+    for (int i = 0; i < src_coords.size(); i++) {
+        std::cout << src_coords[i] << ", ";
+    }
+    std::cout << "] to goal coords: [";
+    for (int i = 0; i < goal_coords.size(); i++) {
+        std::cout << goal_coords[i] << ", ";
+    }
+    std::cout << "] via my coords: [";
+    for (int i = 0; i < my_coords.size(); i++) {
+        std::cout << my_coords[i] << ", ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "next hop coords: [";
+    for (int i = 0; i < goal_coords.size(); i++) {
+        if (i == min_queue_dim) {
+            std::cout << my_coords[i] + route.quadrant[i] << ", ";
+        } else {
+            std::cout << my_coords[i] << ", ";
+        }
+    }
+    std::cout << "] output direction: " << m_outports_idx2dirn[min_queue_port] << std::endl;
+    fatal_if(goal_coords[min_queue_dim] == my_coords[min_queue_dim],
+             "Goal reached on dimension %d, but still trying to route on it\n",
+             min_queue_dim);
+    int kary = m_router->get_net_ptr()->getKary();
+    if ((my_coords[min_queue_dim] + route.quadrant[min_queue_dim] + kary) % kary == goal_coords[min_queue_dim]) {
+        route.quadrant[min_queue_dim] = 0;
+    }
+    std::cout << "new route quadrant: [";
+    for (int i = 0; i < route.quadrant.size(); i++) {
+        std::cout << route.quadrant[i] << ", ";
+    }
+    std::cout << "]" << std::endl << std::endl;
     return min_queue_port;
 }
 

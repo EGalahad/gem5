@@ -75,6 +75,19 @@ InputUnit::canUseThisVC(int flow_control, int invc, int outvc_offset)
     return false;
 }
 
+// std::vector<int>
+// get_router_coordinates_3(int router_id, int ndim, int kary)
+// {
+//     std::vector<int> router_coords;
+//     int divisor = 1;
+//     for (int i = 0; i < ndim; i++) {
+//         int coord = (router_id / divisor) % kary;
+//         router_coords.push_back(coord);
+//         divisor *= kary;
+//     }
+//     return router_coords;
+// }
+
 /*
  * The InputUnit wakeup function reads the input flit from its input link.
  * Each flit arrives with an input VC.
@@ -108,6 +121,37 @@ InputUnit::wakeup()
             // Route computation for this vc
             int outport = m_router->route_compute(t_flit->get_route(),
                 m_id, m_direction);
+
+            // print route.quadrant
+            std::cout << "[input unit] after route computation, Route quadrant: ";
+            for (int i = 0; i < t_flit->get_route().quadrant.size(); i++) {
+                std::cout << t_flit->get_route().quadrant[i] << " ";
+            }
+            std::cout << std::endl << std::endl;
+
+            // PortDirection outport_direction = m_router->getOutportDirection(outport);
+
+            // std::vector<int> src_coords = get_router_coordinates_3(
+            //     t_flit->get_route().src_router, m_router->get_net_ptr()->getNdim(), m_router->get_net_ptr()->getKary());
+            // std::vector<int> dest_coords = get_router_coordinates_3(
+            //     t_flit->get_route().dest_router, m_router->get_net_ptr()->getNdim(), m_router->get_net_ptr()->getKary());
+            // std::vector<int> my_coords = get_router_coordinates_3(
+            //     m_router->get_id(), m_router->get_net_ptr()->getNdim(), m_router->get_net_ptr()->getKary());
+
+            // std::cout << "packet id: " << t_flit->getPacketID()
+            //           << " from src: [";
+            // for (int i = 0; i < src_coords.size(); i++) {
+            //     std::cout << src_coords[i] << ", ";
+            // }
+            // std::cout << "] to dest: [";
+            // for (int i = 0; i < dest_coords.size(); i++) {
+            //     std::cout << dest_coords[i] << ", ";
+            // }
+            // std::cout << "] via my: [";
+            // for (int i = 0; i < my_coords.size(); i++) {
+            //     std::cout << my_coords[i] << ", ";
+            // }
+            // std::cout << "] outport: " << outport_direction << std::endl;
 
             // Update output port in VC
             // All flits in this packet will use this output port
