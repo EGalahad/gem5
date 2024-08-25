@@ -13,4 +13,4 @@ configs/example/garnet_synth_traffic.py \
 --injectionrate=0.01 \
 --sim-cycles=50000 \
 --garnet-deadlock-threshold 10000 \
---flow-control 1 \
+--flow-control 0 \

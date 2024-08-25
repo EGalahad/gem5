@@ -302,6 +302,7 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
             min_queue_dim = i;
         }
     }
+    // ISSUE: real the final goal
     assert(min_queue_port != -1);
     // if have reached the goal on this dimension, then update the route.quadrant
     std::vector<int> src_coords = get_router_coordinates_2(route.src_router,
