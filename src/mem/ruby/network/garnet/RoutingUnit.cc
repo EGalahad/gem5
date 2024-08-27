@@ -177,6 +177,7 @@ RoutingUnit::outportCompute(RouteInfo& route, int inport,
         // Multiple NIs may be connected to this router,
         // all with output port direction = "Local"
         // Get exact outport id from table
+        // std::cout << "Route to local NI " << route.packet_id << std::endl;
         outport = lookupRoutingTable(route.vnet, route.net_dest);
         return outport;
     }
@@ -289,7 +290,6 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
 
     int min_queue_length = INFINITE_;
     int min_queue_port = -1;
-    int min_queue_dim = -1;
     for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
         int dir = route.quadrant[i];
         if (dir == 0) {
@@ -302,7 +302,6 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
         if (output_queue->getSize() < min_queue_length) {
             min_queue_length = output_queue->getSize();
             min_queue_port = outport;
-            min_queue_dim = i;
         }
     }
     assert(min_queue_port != -1);

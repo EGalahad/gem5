@@ -10,7 +10,7 @@ configs/example/garnet_synth_traffic.py \
 --topology=Torus --kary=$KARY --ndim=$NDIM \
 --routing-algorithm=2 \
 --inj-vnet=0 --synthetic=uniform_random \
---injectionrate=0.01 \
---sim-cycles=50000 \
---garnet-deadlock-threshold 10000 \
---flow-control 0 \
+--injectionrate=2 \
+--sim-cycles=100000 \
+--garnet-deadlock-threshold 5000 \
+--flow-control 1 \
