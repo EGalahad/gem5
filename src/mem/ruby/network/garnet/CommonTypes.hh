@@ -71,9 +71,9 @@ struct RouteInfo
     int dest_router;
     int hops_traversed;
     // indicates if the packet has wrapped around the network
-    int packet_id;
-    // for routing unit debug
     bool has_wrapped;
+    // for routing unit debug
+    int packet_id;
     std::vector<int> quadrant;
     // it is a n dimensional vector representing the quadruant that is selected randomly
     // each value is -1 0 or 1, -1 means go left, 0 means do not go along this dimension, 1 means go right

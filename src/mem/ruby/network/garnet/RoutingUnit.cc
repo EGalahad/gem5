@@ -281,6 +281,12 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
                                 int inport,
                                 PortDirection inport_dirn)
 {
+    // if inport_dirn is not "Local", then update the quadrant
+    if (inport_dirn != "Local") {
+        int inport_dim = inport_dirn[1] - '0';
+        route.quadrant[inport_dim] -= 2 * (route.quadrant[inport_dim] >= 0) - 1;
+    }
+
     int min_queue_length = INFINITE_;
     int min_queue_port = -1;
     int min_queue_dim = -1;
@@ -300,8 +306,6 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
         }
     }
     assert(min_queue_port != -1);
-    // if have reached the goal on this dimension, then update the route.quadrant
-    route.quadrant[min_queue_dim] -= 2 * (route.quadrant[min_queue_dim] > 0) - 1;
     return min_queue_port;
 }
 
