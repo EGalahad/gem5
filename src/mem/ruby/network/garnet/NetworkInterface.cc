@@ -459,33 +459,12 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
             if (positive_distance[i] == 0) {
                 route.quadrant[i] = 0;
             } else {
-                route.quadrant[i] = (random_mt.random(0, kary - 1) < positive_distance[i]) ? -1 : 1;
+                route.quadrant[i] =
+                    (random_mt.random(0, kary - 1) < positive_distance[i])
+                        ? positive_distance[i] - kary
+                        : positive_distance[i];
             }
         }
-
-        // // print out the dest/src coords and positive distance
-        // std::cout << "src_coords: ";
-        // for (int i = 0; i < ndim; i++) {
-        //     std::cout << src_coords[i] << " ";
-        // }
-        // std::cout << std::endl;
-        // std::cout << "dest_coords: ";
-        // for (int i = 0; i < ndim; i++) {
-        //     std::cout << dest_coords[i] << " ";
-        // }
-        // std::cout << std::endl;
-        // std::cout << "positive_distance: ";
-        // for (int i = 0; i < ndim; i++) {
-        //     std::cout << positive_distance[i] << " ";
-        // }
-        // std::cout << std::endl;
-
-        // // print out the quadrant
-        // std::cout << "quadrant: ";
-        // for (int i = 0; i < ndim; i++) {
-        //     std::cout << route.quadrant[i] << " ";
-        // }
-        // std::cout << std::endl;
 
         // initialize hops_traversed to -1
         // so that the first router increments it to 0

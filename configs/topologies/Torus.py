@@ -104,6 +104,7 @@ class Torus(SimpleTopology):
                         is_wrap=(coord[j] == 0),
                     )
                 )
+                coord[j] = (coord[j] + 1) % k
                 link_count += 1
         network.int_links = int_links
     

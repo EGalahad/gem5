@@ -284,26 +284,21 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
     int min_queue_length = INFINITE_;
     int min_queue_port = -1;
     int min_queue_dim = -1;
-    // std::cout << "router id: " << m_router->get_id() << std::endl;
     for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
         int dir = route.quadrant[i];
         if (dir == 0) {
             continue;
         }
-        PortDirection outport_dirn = (dir == -1) ? "L" : "R";
+        PortDirection outport_dirn = (dir < 0) ? "L" : "R";
         outport_dirn += std::to_string(i);
         int outport = m_outports_dirn2idx[outport_dirn];
         flitBuffer* output_queue = m_router->getOutputUnit(outport)->getOutQueue();
-        // std::cout << "\tport direction: " << outport_dirn
-        //           << " queue size: " << output_queue->getSize() << std::endl;
         if (output_queue->getSize() < min_queue_length) {
             min_queue_length = output_queue->getSize();
             min_queue_port = outport;
             min_queue_dim = i;
         }
     }
-    // ISSUE: real the final goal
-    assert(min_queue_port != -1);
     // if have reached the goal on this dimension, then update the route.quadrant
     std::vector<int> src_coords = get_router_coordinates_2(route.src_router,
                                                           m_router->get_net_ptr()->getNdim(),
@@ -333,10 +328,14 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
         std::cout << my_coords[i] << ", ";
     }
     std::cout << "]" << std::endl;
-    std::cout << "next hop coords: [";
+
+    assert(min_queue_port != -1);
+
+    std::cout << "min_queue_dim: " << min_queue_dim; 
+    std::cout << " next hop coords: [";
     for (int i = 0; i < goal_coords.size(); i++) {
         if (i == min_queue_dim) {
-            std::cout << my_coords[i] + route.quadrant[i] << ", ";
+            std::cout << my_coords[i] + 2 * (route.quadrant[i] > 0) - 1 << ", ";
         } else {
             std::cout << my_coords[i] << ", ";
         }
@@ -345,15 +344,15 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
     fatal_if(goal_coords[min_queue_dim] == my_coords[min_queue_dim],
              "Goal reached on dimension %d, but still trying to route on it\n",
              min_queue_dim);
-    int kary = m_router->get_net_ptr()->getKary();
-    if ((my_coords[min_queue_dim] + route.quadrant[min_queue_dim] + kary) % kary == goal_coords[min_queue_dim]) {
-        route.quadrant[min_queue_dim] = 0;
-    }
+
+    // update quadrant
+    route.quadrant[min_queue_dim] -= 2 * (route.quadrant[min_queue_dim] > 0) - 1;
     std::cout << "new route quadrant: [";
     for (int i = 0; i < route.quadrant.size(); i++) {
         std::cout << route.quadrant[i] << ", ";
     }
     std::cout << "]" << std::endl << std::endl;
+
     return min_queue_port;
 }
 
