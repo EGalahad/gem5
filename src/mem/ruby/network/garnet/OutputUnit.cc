@@ -155,9 +155,6 @@ OutputUnit::select_free_vc_star(int vnet, bool isSignificantProductive, bool has
         
         if (is_vc_idle(vc, curTick())) {
             outVcState[vc].setState(ACTIVE_, curTick());
-            // std::cout << "OutputUnit::select_free_vc_star vc: " << vc - vc_base << std::endl;
-            // std::cout << "isSignificantProductive: " << isSignificantProductive << std::endl;
-            // std::cout << "hasWrapped: " << hasWrapped << std::endl;
             return vc;
         }
     }

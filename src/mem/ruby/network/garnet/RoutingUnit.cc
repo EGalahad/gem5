@@ -177,7 +177,6 @@ RoutingUnit::outportCompute(RouteInfo& route, int inport,
         // Multiple NIs may be connected to this router,
         // all with output port direction = "Local"
         // Get exact outport id from table
-        // std::cout << "Route to local NI " << route.packet_id << std::endl;
         outport = lookupRoutingTable(route.vnet, route.net_dest);
         return outport;
     }

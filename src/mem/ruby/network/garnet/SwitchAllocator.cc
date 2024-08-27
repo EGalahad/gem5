@@ -345,12 +345,6 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
           default:
             fatal("Unknown flow control scheme\n");
         }
-        // std::cout << "has_free_vc: " << has_free_vc << std::endl;
-        // std::cout << "isSignificantProductive: " << isSignificantProductive << std::endl;
-        // std::cout << "route.has_wrapped: " << route.has_wrapped << std::endl;
-        // std::cout << "route.quadrant[tar_dim]: " << route.quadrant[tar_dim] << std::endl;
-        // std::cout << "tar_dim: " << tar_dim << std::endl;
-        // std::cout << "outcv: " << outvc - vnet*m_vc_per_vnet << std::endl;
         if (has_free_vc) {
 
             has_outvc = true;
