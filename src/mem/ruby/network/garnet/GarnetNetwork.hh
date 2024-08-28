@@ -214,6 +214,9 @@ class GarnetNetwork : public Network
     std::vector<std::vector<statistics::Scalar *>> m_data_traffic_distribution;
     std::vector<std::vector<statistics::Scalar *>> m_ctrl_traffic_distribution;
 
+    // Reception Rate (packets/node/cycle): total_packets_received/num-cpus/sim-cycles.
+    statistics::Scalar m_reception_rate;
+
   private:
     GarnetNetwork(const GarnetNetwork& obj);
     GarnetNetwork& operator=(const GarnetNetwork& obj);

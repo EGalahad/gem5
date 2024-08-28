@@ -570,6 +570,11 @@ GarnetNetwork::regStats()
             m_ctrl_traffic_distribution[source].push_back(ctrl_packets);
         }
     }
+
+    // Reception Rate (packets/node/cycle): total_packets_received/num-cpus/sim-cycles.
+    m_reception_rate
+        .name(name() + ".reception_rate")
+        .flags(statistics::nozero | statistics::oneline);
 }
 
 void
@@ -597,6 +602,9 @@ GarnetNetwork::collateStats()
             m_average_vc_load[j] += ((double)vc_load[j] / time_delta);
         }
     }
+
+    // Calculate reception rate
+    m_reception_rate = m_packets_received.total() / (time_delta * m_routers.size());
 
     // Ask the routers to collate their statistics
     for (int i = 0; i < m_routers.size(); i++) {
