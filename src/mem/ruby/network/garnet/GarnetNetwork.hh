@@ -78,6 +78,7 @@ class GarnetNetwork : public Network
     // for torus topology
     int getKary() const { return m_kary; }
     int getNdim() const { return m_ndim; }
+    bool getRandomizeQuadrant() const { return m_randomize_quadrant; }
 
     // for network
     uint32_t getNiFlitSize() const { return m_ni_flit_size; }
@@ -169,6 +170,7 @@ class GarnetNetwork : public Network
     int m_num_cols;
     int m_kary;
     int m_ndim;
+    bool m_randomize_quadrant;
     uint32_t m_ni_flit_size;
     uint32_t m_max_vcs_per_vnet;
     uint32_t m_buffers_per_ctrl_vc;

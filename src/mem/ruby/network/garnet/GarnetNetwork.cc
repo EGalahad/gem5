@@ -67,6 +67,9 @@ GarnetNetwork::GarnetNetwork(const Params &p)
     m_num_rows = p.num_rows;
     m_kary = p.kary;
     m_ndim = p.ndim;
+    m_randomize_quadrant = p.randomize_quadrant;
+    inform("GarnetNetwork: enabling quadrant random selection: %s",
+           m_randomize_quadrant ? "true" : "false");
     m_ni_flit_size = p.ni_flit_size;
     m_max_vcs_per_vnet = 0;
     m_buffers_per_data_vc = p.buffers_per_data_vc;

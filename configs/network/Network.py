@@ -59,6 +59,12 @@ def define_options(parser):
         default=0,
         help="the value of n in the k-ary n-cube topology",
     )
+    # add a bool type argument to enable the randomize quadrant
+    parser.add_argument(
+        "--randomize_quadrant",
+        action="store_true",
+        help="randomize the quadrant for torus topology",
+    )
     parser.add_argument(
         "--network",
         default="simple",
@@ -188,6 +194,7 @@ def init_network(options, network, InterfaceClass):
         network.num_rows = options.mesh_rows
         network.kary = options.kary
         network.ndim = options.ndim
+        network.randomize_quadrant = options.randomize_quadrant
         network.vcs_per_vnet = options.vcs_per_vnet
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm

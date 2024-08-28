@@ -446,6 +446,7 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
 
         int ndim = m_net_ptr->getNdim();
         int kary = m_net_ptr->getKary();
+        bool randomize_quadrant = m_net_ptr->getRandomizeQuadrant();
         auto src_coords = get_router_coordinates(route.src_router, ndim, kary);
         auto dest_coords = get_router_coordinates(route.dest_router, ndim, kary);
 
@@ -461,10 +462,16 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
             if (positive_distance[i] == 0) {
                 route.quadrant[i] = 0;
             } else {
-                route.quadrant[i] =
-                    (random_mt.random(0, kary - 1) < positive_distance[i])
-                        ? positive_distance[i] - kary
-                        : positive_distance[i];
+                if (randomize_quadrant) {
+                    route.quadrant[i] =
+                        (random_mt.random(0, kary - 1) < positive_distance[i])
+                            ? positive_distance[i] - kary
+                            : positive_distance[i];
+                } else {
+                    // select minimum distance
+                    route.quadrant[i] = positive_distance[i]
+                     - (positive_distance[i] > kary / 2 ? kary : 0);
+                }
             }
         }
 

@@ -11,6 +11,10 @@ configs/example/garnet_synth_traffic.py \
 --routing-algorithm=2 \
 --inj-vnet=0 --synthetic=uniform_random \
 --injectionrate=2 \
---sim-cycles=100000 \
+--sim-cycles=10000000 \
 --garnet-deadlock-threshold 5000 \
 --flow-control 1 \
+# --randomize_quadrant
+
+
+# set args configs/example/garnet_synth_traffic.py --network=garnet --num-cpus=8 --num-dirs=8 --topology=Torus --kary=2 --ndim=3 --routing-algorithm=2 --inj-vnet=0 --synthetic=uniform_random --injectionrate=2 --sim-cycles=100000 --garnet-deadlock-threshold 5000 --flow-control 1
