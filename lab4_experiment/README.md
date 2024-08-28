@@ -10,7 +10,7 @@ scons build/NULL/gem5.opt PROTOCOL=Garnet_standalone -j $(nproc)
 
 ## Verification of deadlock-free
 
-We provide the following file to show that our implementation is deadlock-free. The bash file will simulate for 100000 cycles and the deadlock detection threshold is set to 5000. The result will be save to `./log.txt`.
+We provide the following file to show that our implementation is deadlock-free. The bash file will simulate for 100000 cycles and the deadlock detection threshold is set to 5000. The result will be save to `./log.txt`. Please make sure you are at the root directory `gem5`. Then you can run:
 
 ```
 ./example.sh
