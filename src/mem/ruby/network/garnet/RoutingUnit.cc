@@ -194,6 +194,8 @@ RoutingUnit::outportCompute(RouteInfo& route, int inport,
         // any custom algorithm
         case GOAL_: outport =
             outportComputeGoal(route, inport, inport_dirn); break;
+        case DOR_: outport =
+            outportComputeDOR(route, inport, inport_dirn); break;
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
         default: outport =
