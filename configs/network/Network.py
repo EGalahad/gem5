@@ -107,6 +107,8 @@ def define_options(parser):
         help="""routing algorithm in network.
             0: weight-based table
             1: XY (for Mesh. see garnet/RoutingUnit.cc)
+            2: GOAL (for Torus. see garnet/RoutingUnit.cc)
+            3: DOR (for Torus. see garnet/RoutingUnit.cc)
             2: Custom (see garnet/RoutingUnit.cc""",
     )
     parser.add_argument(

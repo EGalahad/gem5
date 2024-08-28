@@ -307,6 +307,28 @@ RoutingUnit::outportComputeGoal(RouteInfo& route,
     return min_queue_port;
 }
 
+int 
+RoutingUnit::outportComputeDOR(RouteInfo& route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    // if inport_dirn is not "Local", then update the quadrant
+    if (inport_dirn != "Local") {
+        int inport_dim = inport_dirn[1] - '0';
+        route.quadrant[inport_dim] -= 2 * (route.quadrant[inport_dim] >= 0) - 1;
+    }
+
+    // return the first dimension that the quadrant is not zero
+    for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
+        if (route.quadrant[i] != 0) {
+            PortDirection outport_dirn = (route.quadrant[i] < 0) ? "L" : "R";
+            outport_dirn += std::to_string(i);
+            return m_outports_dirn2idx[outport_dirn];
+        }
+    }
+    fatal("DOR routing failed to find a valid output port");
+}
+
 // Template for implementing custom routing algorithm
 // using port directions. (Example adaptive)
 int
