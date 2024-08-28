@@ -57,7 +57,7 @@ struct RouteInfo
 {
     RouteInfo()
         : vnet(0), src_ni(0), src_router(0), dest_ni(0), dest_router(0),
-          hops_traversed(0), has_wrapped(false)
+          hops_traversed(0)
     {}
 
     // destination format for table-based routing
@@ -71,7 +71,7 @@ struct RouteInfo
     int dest_router;
     int hops_traversed;
     // indicates if the packet has wrapped around the network
-    bool has_wrapped;
+    std::vector<bool> has_wrapped;
     // for routing unit debug
     int packet_id;
     std::vector<int> quadrant;

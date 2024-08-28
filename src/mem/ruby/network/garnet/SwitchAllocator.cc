@@ -225,9 +225,10 @@ SwitchAllocator::arbitrate_outports()
                 // (This was updated in VC by vc_allocate, but not in flit)
                 t_flit->set_vc(outvc);
                 bool is_wrap = output_unit->isWrap();
-                if (is_wrap) {
+                int tar_dim = output_unit->get_direction()[1] - '0';
+                if (output_unit->get_direction() != "Local" && is_wrap) {
                     RouteInfo route = t_flit->get_route();
-                    route.has_wrapped = true;
+                    route.has_wrapped[tar_dim] = true;
                     t_flit->set_route(route);
                 }
 
@@ -340,7 +341,7 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
                     isSignificantProductive = false;
                     break;
                 }
-            has_free_vc = output_unit->has_free_vc_star(vnet, isSignificantProductive, route.has_wrapped);
+            has_free_vc = output_unit->has_free_vc_star(vnet, isSignificantProductive, route.has_wrapped[tar_dim]);
             break;
           default:
             fatal("Unknown flow control scheme\n");
@@ -377,7 +378,7 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
             if (input_unit->need_stage(temp_vc, SA_, curTick()) &&
                (input_unit->get_outport(temp_vc) == outport) &&
                (input_unit->get_enqueue_time(temp_vc) < t_enqueue_time) &&
-               input_unit->canUseThisVC((m_router->get_net_ptr())->getFlowControl(), temp_vc, outvc - vc_base)) {
+               input_unit->canUseThisVC((m_router->get_net_ptr())->getFlowControl(), temp_vc, outvc - vc_base, output_unit->get_direction()[1] - '0')) {
                 return false;
             }
         }
@@ -419,7 +420,7 @@ SwitchAllocator::vc_allocate_star(int outport, int inport, int invc)
         }
     
     int outvc =
-        m_router->getOutputUnit(outport)->select_free_vc_star(get_vnet(invc), isSignificantProductive, route.has_wrapped);
+        m_router->getOutputUnit(outport)->select_free_vc_star(get_vnet(invc), isSignificantProductive, route.has_wrapped[tar_dim]);
 
     // has to get a valid VC since it checked before performing SA
     assert(outvc != -1);

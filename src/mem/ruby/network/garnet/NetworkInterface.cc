@@ -455,7 +455,9 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         }
 
         route.quadrant.resize(ndim);
+        route.has_wrapped.resize(ndim);
         for (int i = 0; i < ndim; i++) {
+            route.has_wrapped[i] = false;
             if (positive_distance[i] == 0) {
                 route.quadrant[i] = 0;
             } else {
