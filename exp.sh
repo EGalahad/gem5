@@ -1,21 +1,23 @@
-KARY=4
-NDIM=3
+KARY=8
+NDIM=2
 SYNTHETIC=uniform_random
 # ncores = kary^ndim
 N_CORES=$(( $KARY ** $NDIM ))
 echo "kary = $KARY, ndim = $NDIM, ncores = $N_CORES"
 
-# ./build/NULL/gem5.opt \
-# configs/example/garnet_synth_traffic.py \
-# --network=garnet --num-cpus=$N_CORES --num-dirs=$N_CORES \
-# --topology=Torus --kary=$KARY --ndim=$NDIM \
-# --routing-algorithm=2 \
-# --inj-vnet=0 --synthetic=$SYNTHETIC \
-# --injectionrate=2 \
-# --sim-cycles=100000 \
-# --garnet-deadlock-threshold 5000 \
-# --flow-control 1 \
-# --randomize_quadrant
+./build/NULL/gem5.opt \
+configs/example/garnet_synth_traffic.py \
+--network=garnet --num-cpus=$N_CORES --num-dirs=$N_CORES \
+--topology=Torus --kary=$KARY --ndim=$NDIM \
+--routing-algorithm=2 \
+--inj-vnet=0 --synthetic=$SYNTHETIC \
+--injectionrate=0.5 \
+--sim-cycles=100000 \
+--garnet-deadlock-threshold 5000 \
+--vcs-per-vnet=3 \
+--flow-control 1 \
+--randomize_quadrant
+
 result_file=log.txt
 echo > $result_file
 grep "packets_injected::total" m5out/stats.txt | sed 's/system.ruby.network.packets_injected::total\s*/packets_injected = /' >> $result_file

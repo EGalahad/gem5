@@ -1,8 +1,1 @@
 
-packets_injected = 3036453                       (Unspecified)
-packets_received = 3035873                       (Unspecified)
-average_packet_queueing_latency = 1626.294282                       (Unspecified)
-average_packet_network_latency = 16.520725                       (Unspecified)
-average_packet_latency = 1642.815007                       (Unspecified)
-average_hops = 3.000800                       (Unspecified)
-reception_rate = 0.474355                       # Reception rate (packets/node/cycle) (Unspecified)
