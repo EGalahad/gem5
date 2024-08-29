@@ -31,7 +31,6 @@ df = pd.DataFrame(data)
 plt.figure(figsize=(10, 6))
 for k, n in [(64, 1), (8, 2), (4, 3)]: 
     df_n = df[df["n"] == n]
-    print(df_n)
     plt.plot(df_n["injection_rate"], df_n["average_packet_latency"], label=f"{n}-D {k}-ary Torus")
 
 plt.xlim(0, 1)
@@ -56,4 +55,9 @@ plt.legend()
 plt.grid(True)
 plt.savefig(f"lab4_experiment/result/topology/torus_reception.png")
 
-print(df.agg({"average_hops": ["mean", "std"]}))
+analysis = (
+    df.groupby("n")
+    .agg({"average_hops": ["mean", "std"]})
+)
+
+print(analysis)
