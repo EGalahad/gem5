@@ -1,5 +1,5 @@
 # Deadlock-free Verifier
-
+FLOW_CONTROL=1
 KARY=4
 NDIM=3
 SYNTHETIC=uniform_random
@@ -8,7 +8,7 @@ N_CORES=$(( $KARY ** $NDIM ))
 echo "kary = $KARY, ndim = $NDIM, ncores = $N_CORES"
 
 ./build/NULL/gem5.opt \
-configs/example/garnet_synth_traffic.py --network=garnet --num-cpus=$N_CORES --num-dirs=$N_CORES --topology=Torus --kary=$KARY --ndim=$NDIM --routing-algorithm=$ALGORITHM --inj-vnet=0 --synthetic=$SYNTHETIC --injectionrate=1 --sim-cycles=100000 --garnet-deadlock-threshold 5000 --flow-control 1 --randomize_quadrant
+configs/example/garnet_synth_traffic.py --network=garnet --num-cpus=$N_CORES --num-dirs=$N_CORES --topology=Torus --kary=$KARY --ndim=$NDIM --routing-algorithm=$ALGORITHM --inj-vnet=0 --synthetic=$SYNTHETIC --injectionrate=1 --sim-cycles=200000 --garnet-deadlock-threshold 5000 --flow-control $FLOW_CONTROL --randomize_quadrant
 
 result_file=log.txt
 echo > $result_file

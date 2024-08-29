@@ -3,15 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-log_dir="lab4_experiment/log/quadrant"
+log_dir="lab4_experiment/log/routing"
 injection_rates = [round(x, 2) for x in np.arange(0.05, 1.0, 0.05)]
-traffics = ["uniform_random", "shuffle"]
+algorithms = [2, 3]
+mapping = {2: "GOAL Routing", 3: "Dimension Order Routing"}
 
 data = []
 
 for rate in injection_rates:
-    for traffic in traffics:
-        result_file = os.path.join(log_dir, f"quadrant_synthetic_{traffic}_injection_rate_{rate}_derandom.txt")
+    for algo in algorithms:
+        result_file = os.path.join(log_dir, f"routing_algo_{algo}_injection_rate_{rate}.txt")
         if os.path.exists(result_file):
             with open(result_file, "r") as f:
                 stats = {
@@ -24,59 +25,41 @@ for rate in injection_rates:
                     for line in f.readlines()[2:]
                 }
                 stats["injection_rate"] = rate
-                stats["traffic"] = traffic
-                stats["quadrant"] = "derandom"
-                data.append(stats)
-        result_file = os.path.join(log_dir, f"quadrant_synthetic_{traffic}_injection_rate_{rate}_random.txt")
-        if os.path.exists(result_file):
-            with open(result_file, "r") as f:
-                stats = {
-                    line.split("(")[0]
-                    .strip()
-                    .split("=")[0]
-                    .strip(): float(
-                        line.split("(")[0].strip().split("=")[-1].strip()
-                    )
-                    for line in f.readlines()[2:]
-                }
-                stats["injection_rate"] = rate
-                stats["traffic"] = traffic
-                stats["quadrant"] = "random"
+                stats["algorithm"] = algo
                 data.append(stats)
 
 df = pd.DataFrame(data)
 
 plt.figure(figsize=(10, 6))
-for traffic in traffics:
-    df_traffic = df[df["traffic"] == traffic]
-    for quadrant in ["derandom", "random"]:
-        df_quadrant = df_traffic[df_traffic["quadrant"] == quadrant]
-        plt.plot(df_quadrant["injection_rate"], df_quadrant["average_packet_latency"], label=f"{traffic} Traffic {quadrant} Quadrant")
+for algo in algorithms:
+    df_algo = df[df["algorithm"] == algo]
+    plt.plot(df_algo["injection_rate"], df_algo["average_packet_latency"], label=f"Algorithm {mapping[algo]}")
 
 plt.xlabel("Injection Rate")
 plt.ylabel("Average Packet Latency")
-plt.title("Latency-Throughput Curve for Different Traffic")
+plt.title("Routing Experiment: Latency to Injection Rate")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"lab4_experiment/result/quadrant/quadrant_latency.png")
+plt.savefig(f"lab4_experiment/result/routing/routing_latency.png")
 
 plt.figure(figsize=(10, 6))
-for traffic in traffics:
-    df_traffic = df[df["traffic"] == traffic]
-    for quadrant in ["derandom", "random"]:
-        df_quadrant = df_traffic[df_traffic["quadrant"] == quadrant]
-        plt.plot(df_quadrant["injection_rate"], df_quadrant["reception_rate"] * 2, label=f"{traffic} Traffic {quadrant} Quadrant")
+for algo in algorithms:
+    df_algo = df[df["algorithm"] == algo]
+    plt.plot(df_algo["injection_rate"], df_algo["reception_rate"] * 2, label=f"Algorithm {mapping[algo]}")
 
 plt.xlabel("Injection Rate")
 plt.ylabel("Reception Rate")
-plt.title("Latency-Throughput Curve for Different Traffic")
+plt.title("Routing Experiment: Reception Rate to Injection Rate")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"lab4_experiment/result/quadrant/quadrant_reception.png")
+plt.savefig(f"lab4_experiment/result/routing/routing_reception.png")
 
+
+# Replace algorithm with mapping
+df['algorithm'] = df['algorithm'].map(mapping)
 
 analysis = (
-    df.groupby(["traffic", "quadrant"])
+    df.groupby("algorithm")
     .agg({"average_hops": ["mean", "std"]})
 )
 

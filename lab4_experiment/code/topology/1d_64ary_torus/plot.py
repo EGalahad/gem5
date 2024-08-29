@@ -33,7 +33,7 @@ plt.plot(df["injection_rate"], df["average_packet_latency"], label=f"{n}-D {k}-a
 
 plt.xlabel("Injection Rate")
 plt.ylabel("Average Packet Latency")
-plt.title("Latency-Throughput Curve for Uniform Random Traffic")
+plt.title("Topology Experiment (1D): Latency to Injection Rate")
 plt.legend()
 plt.grid(True)
 plt.savefig(f"lab4_experiment/result/topology/{n}d_{k}ary_torus_latency.png")
@@ -43,7 +43,7 @@ plt.plot(df["injection_rate"], df["reception_rate"] * 2, label=f"{n}-D {k}-ary T
 
 plt.xlabel("Injection Rate")
 plt.ylabel("Reception Rate")
-plt.title("Latency-Throughput Curve for Uniform Random Traffic")
+plt.title("Topology Experiment (1D): Reception Rate to Injection Rate")
 plt.legend()
 plt.grid(True)
 plt.savefig(f"lab4_experiment/result/topology/{n}d_{k}ary_torus_reception.png")
