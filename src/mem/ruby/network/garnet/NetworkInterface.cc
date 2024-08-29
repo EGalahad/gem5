@@ -36,6 +36,7 @@
 #include <cmath>
 
 #include "base/cast.hh"
+#include "base/random.hh"
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet/Credit.hh"
@@ -364,6 +365,19 @@ NetworkInterface::checkStallQueue()
     }
 }
 
+std::vector<int>
+get_router_coordinates(int router_id, int ndim, int kary)
+{
+    std::vector<int> router_coords;
+    int divisor = 1;
+    for (int i = 0; i < ndim; i++) {
+        int coord = (router_id / divisor) % kary;
+        router_coords.push_back(coord);
+        divisor *= kary;
+    }
+    return router_coords;
+}
+
 // Embed the protocol message into flits
 bool
 NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
@@ -430,6 +444,37 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         route.dest_ni = destID;
         route.dest_router = m_net_ptr->get_router_id(destID, vnet);
 
+        int ndim = m_net_ptr->getNdim();
+        int kary = m_net_ptr->getKary();
+        bool randomize_quadrant = m_net_ptr->getRandomizeQuadrant();
+        auto src_coords = get_router_coordinates(route.src_router, ndim, kary);
+        auto dest_coords = get_router_coordinates(route.dest_router, ndim, kary);
+
+        std::vector<int> positive_distance(ndim, 0); // the distance in each dimension if travel in positive direction
+        for (int i = 0; i < ndim; i++) {
+            positive_distance[i] = (dest_coords[i] - src_coords[i] + kary) % kary;
+        }
+
+        route.quadrant.resize(ndim);
+        route.has_wrapped.resize(ndim);
+        for (int i = 0; i < ndim; i++) {
+            route.has_wrapped[i] = false;
+            if (positive_distance[i] == 0) {
+                route.quadrant[i] = 0;
+            } else {
+                if (randomize_quadrant) {
+                    route.quadrant[i] =
+                        (random_mt.random(0, kary - 1) < positive_distance[i])
+                            ? positive_distance[i] - kary
+                            : positive_distance[i];
+                } else {
+                    // select minimum distance
+                    route.quadrant[i] = positive_distance[i]
+                     - (positive_distance[i] > kary / 2 ? kary : 0);
+                }
+            }
+        }
+
         // initialize hops_traversed to -1
         // so that the first router increments it to 0
         route.hops_traversed = -1;
@@ -437,6 +482,7 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         m_net_ptr->increment_injected_packets(vnet);
         m_net_ptr->update_traffic_distribution(route);
         int packet_id = m_net_ptr->getNextPacketID();
+        route.packet_id = packet_id;
         for (int i = 0; i < num_flits; i++) {
             m_net_ptr->increment_injected_flits(vnet);
             flit *fl = new flit(packet_id,

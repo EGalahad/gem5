@@ -34,6 +34,7 @@
 #include "base/compiler.hh"
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/garnet/InputUnit.hh"
+#include "mem/ruby/network/garnet/OutputUnit.hh"
 #include "mem/ruby/network/garnet/Router.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 
@@ -166,7 +167,7 @@ RoutingUnit::addOutDirection(PortDirection outport_dirn, int outport_idx)
 // table is provided here.
 
 int
-RoutingUnit::outportCompute(RouteInfo route, int inport,
+RoutingUnit::outportCompute(RouteInfo& route, int inport,
                             PortDirection inport_dirn)
 {
     int outport = -1;
@@ -191,6 +192,10 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
         case XY_:     outport =
             outportComputeXY(route, inport, inport_dirn); break;
         // any custom algorithm
+        case GOAL_: outport =
+            outportComputeGoal(route, inport, inport_dirn); break;
+        case DOR_: outport =
+            outportComputeDOR(route, inport, inport_dirn); break;
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
         default: outport =
@@ -258,6 +263,72 @@ RoutingUnit::outportComputeXY(RouteInfo route,
     }
 
     return m_outports_dirn2idx[outport_dirn];
+}
+
+std::vector<int>
+get_router_coordinates_2(int router_id, int ndim, int kary)
+{
+    std::vector<int> router_coords;
+    int divisor = 1;
+    for (int i = 0; i < ndim; i++) {
+        int coord = (router_id / divisor) % kary;
+        router_coords.push_back(coord);
+        divisor *= kary;
+    }
+    return router_coords;
+}
+
+int
+RoutingUnit::outportComputeGoal(RouteInfo& route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    // if inport_dirn is not "Local", then update the quadrant
+    if (inport_dirn != "Local") {
+        int inport_dim = inport_dirn[1] - '0';
+        route.quadrant[inport_dim] -= 2 * (route.quadrant[inport_dim] >= 0) - 1;
+    }
+
+    int min_queue_length = INFINITE_;
+    int min_queue_port = -1;
+    for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
+        int dir = route.quadrant[i];
+        if (dir == 0) {
+            continue;
+        }
+        PortDirection outport_dirn = (dir < 0) ? "L" : "R";
+        outport_dirn += std::to_string(i);
+        int outport = m_outports_dirn2idx[outport_dirn];
+        flitBuffer* output_queue = m_router->getOutputUnit(outport)->getOutQueue();
+        if (output_queue->getSize() < min_queue_length) {
+            min_queue_length = output_queue->getSize();
+            min_queue_port = outport;
+        }
+    }
+    assert(min_queue_port != -1);
+    return min_queue_port;
+}
+
+int 
+RoutingUnit::outportComputeDOR(RouteInfo& route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    // if inport_dirn is not "Local", then update the quadrant
+    if (inport_dirn != "Local") {
+        int inport_dim = inport_dirn[1] - '0';
+        route.quadrant[inport_dim] -= 2 * (route.quadrant[inport_dim] >= 0) - 1;
+    }
+
+    // return the first dimension that the quadrant is not zero
+    for (int i = 0; i < m_router->get_net_ptr()->getNdim(); i++) {
+        if (route.quadrant[i] != 0) {
+            PortDirection outport_dirn = (route.quadrant[i] < 0) ? "L" : "R";
+            outport_dirn += std::to_string(i);
+            return m_outports_dirn2idx[outport_dirn];
+        }
+    }
+    fatal("DOR routing failed to find a valid output port");
 }
 
 // Template for implementing custom routing algorithm

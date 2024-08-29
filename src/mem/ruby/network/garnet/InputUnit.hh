@@ -156,6 +156,8 @@ class InputUnit : public Consumer
     uint32_t functionalWrite(Packet *pkt);
 
     void resetStats();
+    
+    bool canUseThisVC(int flow_control, int invc, int outvc_offset, int dim);
 
   private:
     Router *m_router;

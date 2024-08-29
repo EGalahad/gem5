@@ -65,12 +65,18 @@ GarnetNetwork::GarnetNetwork(const Params &p)
     : Network(p)
 {
     m_num_rows = p.num_rows;
+    m_kary = p.kary;
+    m_ndim = p.ndim;
+    m_randomize_quadrant = p.randomize_quadrant;
+    inform("GarnetNetwork: enabling quadrant random selection: %s",
+           m_randomize_quadrant ? "true" : "false");
     m_ni_flit_size = p.ni_flit_size;
     m_max_vcs_per_vnet = 0;
     m_buffers_per_data_vc = p.buffers_per_data_vc;
     m_buffers_per_ctrl_vc = p.buffers_per_ctrl_vc;
     m_routing_algorithm = p.routing_algorithm;
     m_next_packet_id = 0;
+    m_flow_control = p.flow_control;
 
     m_enable_fault_model = p.enable_fault_model;
     if (m_enable_fault_model)
@@ -103,6 +109,12 @@ GarnetNetwork::GarnetNetwork(const Params &p)
         ni->init_net_ptr(this);
     }
 
+    // check the flow control requirement
+    if (m_flow_control == 1) {
+        // for star flow control, we need 2 *-channel and at least 1 non-*-channel, here we keep the the redundant channel to be the non-* ones
+        assert(p.vcs_per_vnet >= 3);
+    }
+
     // Print Garnet version
     inform("Garnet version %s\n", garnetVersion);
 }
@@ -132,6 +144,14 @@ GarnetNetwork::init()
     } else {
         m_num_rows = -1;
         m_num_cols = -1;
+    }
+
+    if (getKary() > 0) {
+        // Only for Torus topology
+        assert(m_routers.size() == pow(getKary(), getNdim()));
+    } else {
+        m_kary = -1;
+        m_ndim = -1;
     }
 
     // FaultModel: declare each router to the fault model
@@ -322,6 +342,8 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
     m_max_vcs_per_vnet = std::max(m_max_vcs_per_vnet,
                              std::max(m_routers[dest]->get_vc_per_vnet(),
                              m_routers[src]->get_vc_per_vnet()));
+
+    garnet_link->m_network_link->setWrap(garnet_link->isWrap());
 
     /*
      * We check if a bridge was enabled at any end of the link.
@@ -548,6 +570,11 @@ GarnetNetwork::regStats()
             m_ctrl_traffic_distribution[source].push_back(ctrl_packets);
         }
     }
+
+    // Reception Rate (packets/node/cycle): total_packets_received/num-cpus/sim-cycles.
+    m_reception_rate
+        .name(name() + ".reception_rate")
+        .flags(statistics::nozero | statistics::oneline);
 }
 
 void
@@ -575,6 +602,9 @@ GarnetNetwork::collateStats()
             m_average_vc_load[j] += ((double)vc_load[j] / time_delta);
         }
     }
+
+    // Calculate reception rate
+    m_reception_rate = m_packets_received.total() / (time_delta * m_routers.size());
 
     // Ask the routers to collate their statistics
     for (int i = 0; i < m_routers.size(); i++) {

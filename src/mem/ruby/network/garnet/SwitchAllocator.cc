@@ -92,7 +92,6 @@ SwitchAllocator::wakeup()
 {
     arbitrate_inports(); // First stage of allocation
     arbitrate_outports(); // Second stage of allocation
-
     clear_request_vector();
     check_for_wakeup();
 }
@@ -126,6 +125,7 @@ SwitchAllocator::arbitrate_inports()
 
                 // check if the flit in this InputVC is allowed to be sent
                 // send_allowed conditions described in that function.
+                
                 bool make_request =
                     send_allowed(inport, invc, outport, outvc);
 
@@ -158,7 +158,6 @@ SwitchAllocator::arbitrate_inports()
  * to the upstream router. For HEAD_TAIL/TAIL flits, is_free_signal in the
  * credit is set to true.
  */
-
 void
 SwitchAllocator::arbitrate_outports()
 {
@@ -178,11 +177,24 @@ SwitchAllocator::arbitrate_outports()
 
                 // grant this outport to this inport
                 int invc = m_vc_winners[inport];
-
                 int outvc = input_unit->get_outvc(invc);
                 if (outvc == -1) {
                     // VC Allocation - select any free VC from outport
-                    outvc = vc_allocate(outport, inport, invc);
+                    switch ((m_router->get_net_ptr())->getFlowControl())
+                    {
+                    case DEFAULT_:
+                        outvc = vc_allocate(outport, inport, invc);
+                        break;
+                    case STAR_:
+                        if (output_unit->get_direction() == "Local") {
+                            outvc = vc_allocate(outport, inport, invc);
+                            break;
+                        }
+                        outvc = vc_allocate_star(outport, inport, invc);
+                        break;
+                    default:
+                        fatal("Unknown flow control scheme\n");
+                    }
                 }
 
                 // remove flit from Input VC
@@ -209,9 +221,16 @@ SwitchAllocator::arbitrate_outports()
                 // outport is updated in VC, but not in flit
                 t_flit->set_outport(outport);
 
-                // set outvc (i.e., invc for next hop) in flit
+                // set outvc (i.e., invc for next hop) in flit and has wrapped
                 // (This was updated in VC by vc_allocate, but not in flit)
                 t_flit->set_vc(outvc);
+                bool is_wrap = output_unit->isWrap();
+                int tar_dim = output_unit->get_direction()[1] - '0';
+                if (output_unit->get_direction() != "Local" && is_wrap) {
+                    RouteInfo route = t_flit->get_route();
+                    route.has_wrapped[tar_dim] = true;
+                    t_flit->set_route(route);
+                }
 
                 // decrement credit in outvc
                 output_unit->decrement_credit(outvc);
@@ -280,6 +299,8 @@ SwitchAllocator::arbitrate_outports()
  *     that arrived before this flit and is requesting the same output port.
  */
 
+
+
 bool
 SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
 {
@@ -293,11 +314,39 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
 
     auto output_unit = m_router->getOutputUnit(outport);
     if (!has_outvc) {
+        InputUnit *in_unit = m_router->getInputUnit(inport);
+        int tar_dim = output_unit->get_direction()[1] - '0';
+        flit *t_flit = in_unit->peekTopFlit(invc);
+        RouteInfo route = t_flit->get_route();
 
+        
         // needs outvc
         // this is only true for HEAD and HEAD_TAIL flits.
-
-        if (output_unit->has_free_vc(vnet)) {
+        bool has_free_vc;
+        bool isSignificantProductive = true;
+        switch ((m_router->get_net_ptr())->getFlowControl())
+        {
+          case DEFAULT_:
+            has_free_vc = output_unit->has_free_vc(vnet);
+            break;
+          case STAR_:
+            if (output_unit->get_direction() == "Local") {
+                has_free_vc = output_unit->has_free_vc(vnet);
+                break;
+            }
+            if (route.quadrant[tar_dim] == 0)
+                return false;
+            for (int i = 0; i < tar_dim; i++) 
+                if (route.quadrant[i] != 0) {
+                    isSignificantProductive = false;
+                    break;
+                }
+            has_free_vc = output_unit->has_free_vc_star(vnet, isSignificantProductive, route.has_wrapped[tar_dim]);
+            break;
+          default:
+            fatal("Unknown flow control scheme\n");
+        }
+        if (has_free_vc) {
 
             has_outvc = true;
 
@@ -328,7 +377,8 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
             int temp_vc = vc_base + vc_offset;
             if (input_unit->need_stage(temp_vc, SA_, curTick()) &&
                (input_unit->get_outport(temp_vc) == outport) &&
-               (input_unit->get_enqueue_time(temp_vc) < t_enqueue_time)) {
+               (input_unit->get_enqueue_time(temp_vc) < t_enqueue_time) &&
+               input_unit->canUseThisVC((m_router->get_net_ptr())->getFlowControl(), temp_vc, outvc - vc_base, output_unit->get_direction()[1] - '0')) {
                 return false;
             }
         }
@@ -344,6 +394,33 @@ SwitchAllocator::vc_allocate(int outport, int inport, int invc)
     // Select a free VC from the output port
     int outvc =
         m_router->getOutputUnit(outport)->select_free_vc(get_vnet(invc));
+
+    // has to get a valid VC since it checked before performing SA
+    assert(outvc != -1);
+    m_router->getInputUnit(inport)->grant_outvc(invc, outvc);
+    return outvc;
+}
+
+int
+SwitchAllocator::vc_allocate_star(int outport, int inport, int invc)
+{
+    // Select a free VC from the output port
+    InputUnit *in_unit = m_router->getInputUnit(inport);
+    OutputUnit *output_unit = m_router->getOutputUnit(outport);
+    int tar_dim = output_unit->get_direction()[1] - '0';
+    flit *t_flit = in_unit->peekTopFlit(invc);
+    RouteInfo route = t_flit->get_route();
+
+    bool isSignificantProductive = true;
+    assert(route.quadrant[tar_dim] != 0);
+    for (int i = 0; i < tar_dim; i++) 
+        if (route.quadrant[i] != 0) {
+            isSignificantProductive = false;
+            break;
+        }
+    
+    int outvc =
+        m_router->getOutputUnit(outport)->select_free_vc_star(get_vnet(invc), isSignificantProductive, route.has_wrapped[tar_dim]);
 
     // has to get a valid VC since it checked before performing SA
     assert(outvc != -1);

@@ -68,7 +68,9 @@ class OutputUnit : public Consumer
     void increment_credit(int out_vc);
     bool has_credit(int out_vc);
     bool has_free_vc(int vnet);
+    bool has_free_vc_star(int vnet, bool isSignificantProductive, bool hasWrapped);
     int select_free_vc(int vnet);
+    int select_free_vc_star(int vnet, bool isSignificantProductive, bool hasWrapped);
 
     inline PortDirection get_direction() { return m_direction; }
 
@@ -106,6 +108,12 @@ class OutputUnit : public Consumer
 
     bool functionalRead(Packet *pkt, WriteMask &mask);
     uint32_t functionalWrite(Packet *pkt);
+
+    bool 
+    isWrap()
+    {
+        return m_out_link->isWrap();
+    }
 
   private:
     Router *m_router;

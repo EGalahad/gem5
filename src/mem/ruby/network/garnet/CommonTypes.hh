@@ -50,7 +50,7 @@ enum VC_state_type {IDLE_, VC_AB_, ACTIVE_, NUM_VC_STATE_TYPE_};
 enum VNET_type {CTRL_VNET_, DATA_VNET_, NULL_VNET_, NUM_VNET_TYPE_};
 enum flit_stage {I_, VA_, SA_, ST_, LT_, NUM_FLIT_STAGE_};
 enum link_type { EXT_IN_, EXT_OUT_, INT_, NUM_LINK_TYPES_ };
-enum RoutingAlgorithm { TABLE_ = 0, XY_ = 1, CUSTOM_ = 2,
+enum RoutingAlgorithm { TABLE_ = 0, XY_ = 1, GOAL_ = 2, DOR_ = 3, CUSTOM_ = 4,
                         NUM_ROUTING_ALGORITHM_};
 
 struct RouteInfo
@@ -70,6 +70,13 @@ struct RouteInfo
     int dest_ni;
     int dest_router;
     int hops_traversed;
+    // indicates if the packet has wrapped around the network
+    std::vector<bool> has_wrapped;
+    // for routing unit debug
+    int packet_id;
+    std::vector<int> quadrant;
+    // it is a n dimensional vector representing the quadruant that is selected randomly
+    // each value is -1 0 or 1, -1 means go left, 0 means do not go along this dimension, 1 means go right
 };
 
 #define INFINITE_ 10000

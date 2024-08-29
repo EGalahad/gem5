@@ -71,6 +71,8 @@ GarnetIntLink::GarnetIntLink(const Params &p)
         dstNetBridge = p.dst_net_bridge;
         dstCredBridge = p.dst_cred_bridge;
     }
+
+    m_is_wrap = p.is_wrap;
 }
 
 void

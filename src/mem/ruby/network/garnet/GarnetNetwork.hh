@@ -75,6 +75,11 @@ class GarnetNetwork : public Network
     int getNumRows() const { return m_num_rows; }
     int getNumCols() { return m_num_cols; }
 
+    // for torus topology
+    int getKary() const { return m_kary; }
+    int getNdim() const { return m_ndim; }
+    bool getRandomizeQuadrant() const { return m_randomize_quadrant; }
+
     // for network
     uint32_t getNiFlitSize() const { return m_ni_flit_size; }
     uint32_t getBuffersPerDataVC() { return m_buffers_per_data_vc; }
@@ -157,16 +162,22 @@ class GarnetNetwork : public Network
     void update_traffic_distribution(RouteInfo route);
     int getNextPacketID() { return m_next_packet_id++; }
 
+    int getFlowControl() { return m_flow_control; }
+
   protected:
     // Configuration
     int m_num_rows;
     int m_num_cols;
+    int m_kary;
+    int m_ndim;
+    bool m_randomize_quadrant;
     uint32_t m_ni_flit_size;
     uint32_t m_max_vcs_per_vnet;
     uint32_t m_buffers_per_ctrl_vc;
     uint32_t m_buffers_per_data_vc;
     int m_routing_algorithm;
     bool m_enable_fault_model;
+    int m_flow_control;
 
     // Statistical variables
     statistics::Vector m_packets_received;
@@ -202,6 +213,9 @@ class GarnetNetwork : public Network
 
     std::vector<std::vector<statistics::Scalar *>> m_data_traffic_distribution;
     std::vector<std::vector<statistics::Scalar *>> m_ctrl_traffic_distribution;
+
+    // Reception Rate (packets/node/cycle): total_packets_received/num-cpus/sim-cycles.
+    statistics::Scalar m_reception_rate;
 
   private:
     GarnetNetwork(const GarnetNetwork& obj);

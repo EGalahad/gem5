@@ -1,0 +1,8 @@
+
+packets_injected = 79865                       (Unspecified)
+packets_received = 79780                       (Unspecified)
+average_packet_queueing_latency = 2                       (Unspecified)
+average_packet_network_latency = 9.219830                       (Unspecified)
+average_packet_latency = 11.219830                       (Unspecified)
+average_hops = 3.001617                       (Unspecified)
+reception_rate = 0.124656                       (Unspecified)

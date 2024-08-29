@@ -84,6 +84,8 @@ class NetworkLink : public ClockedObject, public Consumer
     bool functionalRead(Packet *pkt, WriteMask &mask);
     uint32_t functionalWrite(Packet *);
     void resetStats();
+    bool isWrap() { return m_is_wrap; }
+    void setWrap(bool is_wrap) { m_is_wrap = is_wrap; }
 
     std::vector<int> mVnets;
     uint32_t bitWidth;
@@ -98,13 +100,13 @@ class NetworkLink : public ClockedObject, public Consumer
     // Statistical variables
     unsigned int m_link_utilized;
     std::vector<unsigned int> m_vc_load;
+    bool m_is_wrap;
 
   protected:
     uint32_t m_virt_nets;
     flitBuffer linkBuffer;
     Consumer *link_consumer;
     flitBuffer *link_srcQueue;
-
 };
 
 } // namespace garnet

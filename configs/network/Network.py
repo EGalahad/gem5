@@ -48,6 +48,24 @@ def define_options(parser):
         help="the number of rows in the mesh topology",
     )
     parser.add_argument(
+        "--kary",
+        type=int,
+        default=0,
+        help="the value of k in the k-ary n-cube topology",
+    )
+    parser.add_argument(
+        "--ndim",
+        type=int,
+        default=0,
+        help="the value of n in the k-ary n-cube topology",
+    )
+    # add a bool type argument to enable the randomize quadrant
+    parser.add_argument(
+        "--randomize_quadrant",
+        action="store_true",
+        help="randomize the quadrant for torus topology",
+    )
+    parser.add_argument(
         "--network",
         default="simple",
         choices=["simple", "garnet"],
@@ -95,6 +113,8 @@ def define_options(parser):
         help="""routing algorithm in network.
             0: weight-based table
             1: XY (for Mesh. see garnet/RoutingUnit.cc)
+            2: GOAL (for Torus. see garnet/RoutingUnit.cc)
+            3: DOR (for Torus. see garnet/RoutingUnit.cc)
             2: Custom (see garnet/RoutingUnit.cc""",
     )
     parser.add_argument(
@@ -118,7 +138,14 @@ def define_options(parser):
         help="""SimpleNetwork links uses a separate physical
             channel for each virtual network""",
     )
-
+    parser.add_argument(
+        "--flow-control",
+        action="store",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="""Flow control scheme for garnet network, 0: default, 1: star""",
+    )
 
 def create_network(options, ruby):
 
@@ -165,10 +192,14 @@ def init_network(options, network, InterfaceClass):
 
     if options.network == "garnet":
         network.num_rows = options.mesh_rows
+        network.kary = options.kary
+        network.ndim = options.ndim
+        network.randomize_quadrant = options.randomize_quadrant
         network.vcs_per_vnet = options.vcs_per_vnet
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
+        network.flow_control = options.flow_control
 
         # Create Bridges and connect them to the corresponding links
         for intLink in network.int_links:

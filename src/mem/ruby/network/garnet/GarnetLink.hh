@@ -63,6 +63,8 @@ class GarnetIntLink : public BasicIntLink
 
     friend class GarnetNetwork;
 
+    bool isWrap() { return m_is_wrap; }
+
   protected:
     NetworkLink* m_network_link;
     CreditLink* m_credit_link;
@@ -81,6 +83,9 @@ class GarnetIntLink : public BasicIntLink
 
     NetworkBridge* srcCredBridge;
     NetworkBridge* dstCredBridge;
+
+    // whether the link is wrapped around
+    bool m_is_wrap;
 };
 
 inline std::ostream&

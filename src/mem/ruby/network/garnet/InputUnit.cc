@@ -63,6 +63,18 @@ InputUnit::InputUnit(int id, PortDirection direction, Router *router)
     }
 }
 
+bool 
+InputUnit::canUseThisVC(int flow_control, int invc, int outvc_offset, int dim)
+{
+    if (flow_control == 0) return true;
+    if (outvc_offset > 1) return true;
+    flit *t_flit = this->peekTopFlit(invc);
+    RouteInfo route = t_flit->get_route();
+    if (outvc_offset == 1 && route.has_wrapped[dim]) return true;
+    if (outvc_offset == 0 && !route.has_wrapped[dim]) return true;
+    return false;
+}
+
 /*
  * The InputUnit wakeup function reads the input flit from its input link.
  * Each flit arrives with an input VC.

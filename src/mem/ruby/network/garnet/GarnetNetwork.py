@@ -41,6 +41,9 @@ class GarnetNetwork(RubyNetwork):
     cxx_class = "gem5::ruby::garnet::GarnetNetwork"
 
     num_rows = Param.Int(0, "number of rows if 2D (mesh/torus/..) topology")
+    kary = Param.Int(0, "k-ary n-cube for torus topology")
+    ndim = Param.Int(0, "k-ary n-cube for torus topology")
+    randomize_quadrant = Param.Bool(True, "randomize quadrant for torus")
     ni_flit_size = Param.UInt32(16, "network interface flit size in bytes")
     vcs_per_vnet = Param.UInt32(4, "virtual channels per virtual network")
     buffers_per_data_vc = Param.UInt32(4, "buffers per data virtual channel")
@@ -51,6 +54,7 @@ class GarnetNetwork(RubyNetwork):
     garnet_deadlock_threshold = Param.UInt32(
         50000, "network-level deadlock threshold"
     )
+    flow_control = Param.UInt32(0, "0: default, 1: star")
 
 
 class GarnetNetworkInterface(ClockedObject):
@@ -68,6 +72,7 @@ class GarnetNetworkInterface(ClockedObject):
     garnet_deadlock_threshold = Param.UInt32(
         Parent.garnet_deadlock_threshold, "network-level deadlock threshold"
     )
+    flow_control = Param.UInt32(Parent.flow_control, "0: default, 1: star")
 
 
 class GarnetRouter(BasicRouter):
@@ -83,3 +88,4 @@ class GarnetRouter(BasicRouter):
     width = Param.UInt32(
         Parent.ni_flit_size, "bit width supported by the router"
     )
+    flow_control = Param.UInt32(Parent.flow_control, "0: default, 1: star")
