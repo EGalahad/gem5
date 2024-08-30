@@ -13,7 +13,7 @@ scons build/NULL/gem5.opt PROTOCOL=Garnet_standalone -j $(nproc)
 We provide the following file to show that our implementation is deadlock-free. The bash file will simulate for 100000 cycles and the deadlock detection threshold is set to 5000. The result will be save to `./log.txt`. Please make sure you are at the root directory `gem5`. Then you can run:
 
 ```bash
-./example.sh
+bash ./example.sh
 ```
 
 ## Original Experimental Data
@@ -38,15 +38,15 @@ We provide the following file to show that our implementation is deadlock-free. 
 
 ```bash
 # 1-D 64-ary torus experiment
-./lab4_experiment/code/topology/1d_64ary_torus/experiment.sh
+bash ./lab4_experiment/code/topology/1d_64ary_torus/experiment.sh
 python ./lab4_experiment/code/topology/1d_64ary_torus/plot.py
 
 # 2-D 8-ary torus experiment
-./lab4_experiment/code/topology/2d_8ary_torus/experiment.sh
+bash ./lab4_experiment/code/topology/2d_8ary_torus/experiment.sh
 python ./lab4_experiment/code/topology/2d_8ary_torus/plot.py
 
 # 3-D 4-ary torus experiment
-./lab4_experiment/code/topology/3d_4ary_torus/experiment.sh
+bash ./lab4_experiment/code/topology/3d_4ary_torus/experiment.sh
 python ./lab4_experiment/code/topology/3d_4ary_torus/plot.py
 
 # Plot all topologies experimental results
@@ -68,7 +68,7 @@ python ./lab4_experiment/code/topology/plot.py
 
 ```bash
 # Routing experiment
-./lab4_experiment/code/routing/experiment.sh
+bash ./lab4_experiment/code/routing/experiment.sh
 python ./lab4_experiment/code/routing/plot.py
 ```
 
@@ -87,7 +87,7 @@ python ./lab4_experiment/code/routing/plot.py
 
 ```bash
 # Quadrant experiment
-./lab4_experiment/code/quadrant/experiment.sh
+bash ./lab4_experiment/code/quadrant/experiment.sh
 python ./lab4_experiment/code/quadrant/plot.py
 ```
 
