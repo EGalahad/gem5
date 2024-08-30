@@ -80,8 +80,8 @@ python ./lab4_experiment/code/routing/plot.py
 
 1. Make sure you are at the root directory `gem5`.
 2. You need to make sure the following python packages are installed: `pandas`, `matplotlib`, `numpy`.
-3. Run the bash script `./lab4_experiment/code/quadrant/experiment.sh` to run the simulation, the result will be saved in `lab4_experiment/log/routing`.
-4. Run the python code `python ./lab4_experiment/code/quadrant/plot.py` to visualize the result, the images will be saved in `lab4_experiment/result/routing`.
+3. Run the bash script `./lab4_experiment/code/quadrant/experiment.sh` to run the simulation, the result will be saved in `lab4_experiment/log/quadrant`.
+4. Run the python code `python ./lab4_experiment/code/quadrant/plot.py` to visualize the result, the images will be saved in `lab4_experiment/result/quadrant`.
 
 - **TL;DR**
 
