@@ -7,12 +7,12 @@ log_dir="lab4_experiment/log/routing"
 injection_rates = [round(x, 2) for x in np.arange(0.05, 1.0, 0.05)]
 algorithms = [2, 3]
 mapping = {2: "GOAL Routing", 3: "Dimension Order Routing"}
-
+synthetic = "shuffle"
 data = []
 
 for rate in injection_rates:
     for algo in algorithms:
-        result_file = os.path.join(log_dir, f"routing_algo_{algo}_injection_rate_{rate}.txt")
+        result_file = os.path.join(log_dir, f"routing_algo_{algo}_injection_rate_{rate}_{synthetic}.txt")
         if os.path.exists(result_file):
             with open(result_file, "r") as f:
                 stats = {
@@ -37,10 +37,10 @@ for algo in algorithms:
 
 plt.xlabel("Injection Rate")
 plt.ylabel("Average Packet Latency")
-plt.title("Routing Experiment: Latency to Injection Rate")
+plt.title("Routing Experiment (Shuffle): Latency to Injection Rate")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"lab4_experiment/result/routing/routing_latency.png")
+plt.savefig(f"lab4_experiment/result/routing/routing_{synthetic}_latency.png")
 
 plt.figure(figsize=(10, 6))
 for algo in algorithms:
@@ -49,10 +49,10 @@ for algo in algorithms:
 
 plt.xlabel("Injection Rate")
 plt.ylabel("Reception Rate")
-plt.title("Routing Experiment: Reception Rate to Injection Rate")
+plt.title("Routing Experiment (Shuffle): Reception Rate to Injection Rate")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"lab4_experiment/result/routing/routing_reception.png")
+plt.savefig(f"lab4_experiment/result/routing/routing_{synthetic}_reception.png")
 
 
 # Replace algorithm with mapping

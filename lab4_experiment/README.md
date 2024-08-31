@@ -61,15 +61,19 @@ python ./lab4_experiment/code/topology/plot.py
 
 1. Make sure you are at the root directory `gem5`.
 2. You need to make sure the following python packages are installed: `pandas`, `matplotlib`, `numpy`.
-3. Run the bash script `./lab4_experiment/code/routing/experiment.sh` to run the simulation, the result will be saved in `lab4_experiment/log/routing`.
-4. Run the python code `python ./lab4_experiment/code/routing/plot.py` to visualize the result, the images will be saved in `lab4_experiment/result/routing`.
+3. Run the bash script `./lab4_experiment/code/routing/${synthetic}/experiment.sh` to run the simulation, the result will be saved in `lab4_experiment/log/routing`.
+4. Run the python code `python ./lab4_experiment/code/routing/${synthetic}/plot.py` to visualize the result, the images will be saved in `lab4_experiment/result/routing`.
 
 - **TL;DR**
 
 ```bash
-# Routing experiment
-bash ./lab4_experiment/code/routing/experiment.sh
-python ./lab4_experiment/code/routing/plot.py
+# Routing shuffle experiment
+bash ./lab4_experiment/code/routing/shuffle/experiment.sh
+python ./lab4_experiment/code/routing/shuffle/plot.py
+
+# Routing transpose experiment
+bash ./lab4_experiment/code/routing/transpose/experiment.sh
+python ./lab4_experiment/code/routing/transpose/plot.py
 ```
 
 ## Random Quadrant Experiment
@@ -91,7 +95,24 @@ bash ./lab4_experiment/code/quadrant/experiment.sh
 python ./lab4_experiment/code/quadrant/plot.py
 ```
 
+## Virtual Channel Experiment
 
+- All the result of **Virtual Channel** experiments can be reproduced with the code under the directory `lab4_experiment/code/vchannel`
+
+- To reproduce the result, you can follow the steps:
+
+1. Make sure you are at the root directory `gem5`.
+2. You need to make sure the following python packages are installed: `pandas`, `matplotlib`, `numpy`.
+3. Run the bash script `./lab4_experiment/code/vchannel/experiment.sh` to run the simulation, the result will be saved in `lab4_experiment/log/vchannel`.
+4. Run the python code `python ./lab4_experiment/code/vchannel/plot.py` to visualize the result, the images will be saved in `lab4_experiment/result/vchannel`.
+
+- **TL;DR**
+
+```bash
+# Virtual channel experiment
+bash ./lab4_experiment/code/vchannel/experiment.sh
+python ./lab4_experiment/code/vchannel/plot.py
+```
 
 
 
