@@ -1,4 +1,4 @@
-# Description: This script is used to run the experiment for the random quadrant of the network.
+# Description: This script is used to run the experiment for the virtual channels of the network.
 
 log_dir=lab4_experiment/log/vchannel
 mkdir -p $log_dir
